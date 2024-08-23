@@ -24,8 +24,8 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | ID | Nombre | Descripción | Imagen | Costo Unitario | Cantidad |
 |----|--------|:-----------:|--------|:--------------:|:--------:|
 | 1  | ESP32  | La ESP32 actuaría como el cerebro de la gorra inteligente, gestionando la conectividad, procesando los datos de los sensores y controlando la interacción con otros dispositivos para brindar una experiencia adaptada a las necesidades de las personas sordas. |  | $300 | 1 |
-| 2  | DHT11  | Podría medir la temperatura ambiente. Esto podría ser útil para proporcionar información sobre el clima y la temperatura a la persona sorda, ayudándola a adaptarse y tomar las precauciones necesarias. |  |  | $50 | 1 |
-| 3  | HC-SR04 | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |  |  | $50 | 1 |
+| 2  | DHT11  | Podría medir la temperatura ambiente. Esto podría ser útil para proporcionar información sobre el clima y la temperatura a la persona sorda, ayudándola a adaptarse y tomar las precauciones necesarias. |  | $50 | 1 |
+| 3  | HC-SR04 | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |  | $50 | 1 |
 
 
 ### Historias de usuario
