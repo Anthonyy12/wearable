@@ -15,17 +15,33 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ### Software empleado
 | ID | Software | Version | Tipo |
 |----|----------|---------|------|
-| 1  | PlatformIO | 6.1.16 | sdas |
-| 2  | Visual Studio Code | Cell 6  | adad |
-| 3  | Firebase | Cell 9  | dawa |
+| 1  | PlatformIO | 6.1.15 | Open Source |
+| 2  | Visual Studio Code | 1.92.2  | Open Source |
+| 3  | Firebase | -  | Freemium |
+| 4  | EMQX Platform | 5.0  | Open Source |
+| 5  | Flutter | 3.22.2  | Open Source |
 
 
 ### Hardware empleado
-| ID | Nombre | Descripción | Imagen | Costo Unitario | Cantidad |
-|----|--------|:-----------:|--------|:--------------:|:--------:|
-| 1  | ESP32  | La ESP32 actuaría como el cerebro de la gorra inteligente, gestionando la conectividad, procesando los datos de los sensores y controlando la interacción con otros dispositivos para brindar una experiencia adaptada a las necesidades de las personas sordas. |  | $300 | 1 |
-| 2  | DHT11  | Podría medir la temperatura ambiente. Esto podría ser útil para proporcionar información sobre el clima y la temperatura a la persona sorda, ayudándola a adaptarse y tomar las precauciones necesarias. |  | $50 | 1 |
-| 3  | HC-SR04 | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |  | $50 | 1 |
+| ID  | Nombre                      | Descripción                                                                                                                              | Imagen | Costo Unitario | Cantidad |
+|-----|-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------:|--------|:--------------:|:--------:|
+| 1   | ESP32                       | La ESP32 actuaría como el cerebro de la gorra inteligente, gestionando la conectividad, procesando los datos de los sensores y controlando la interacción con otros dispositivos para brindar una experiencia adaptada a las necesidades de las personas sordas. |        | $300           | 1        |
+| 2   | DHT11                       | Podría medir la temperatura ambiente. Esto podría ser útil para proporcionar información sobre el clima y la temperatura a la persona sorda, ayudándola a adaptarse y tomar las precauciones necesarias. |        | $50            | 1        |
+| 3   | HC-SR04                     | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |        | $50            | 1        |
+| 4   | MPU6050                     | Sensor acelerómetro y giroscopio que puede detectar el movimiento y la orientación. Esto podría ayudar a la gorra inteligente a detectar el movimiento del usuario y proporcionar retroalimentación relevante. |        | $74           | 1        |
+| 5   | Pantalla OLED 0.96"         | Pantalla de visualización para mostrar información al usuario, como el estado del dispositivo o alertas importantes. |        | $283           | 1        |
+| 6   | Buzzer pasivo ARD-356        | Puede emitir sonidos como alertas auditivas para el usuario. Podría ser útil para notificaciones. |        | $29            | 1        |
+| 7   | Buzzer                      | Similar al buzzer pasivo, puede emitir sonidos para notificaciones o alertas. |        | $15            | 1        |
+| 8   | Mini Motor vibrador de 2v a 5v | Este motor vibrador puede proporcionar retroalimentación táctil para alertar a la persona sorda a través de vibraciones. |        | $32            | 1        |
+| 9   | Transistor 2N2222           | Componente electrónico que podría usarse para controlar la corriente en diversos circuitos, como los que controlan los motores o los LEDs. |        | $5             | 1        |
+| 10  | Diodo 1N4007                | Componente utilizado para evitar la inversión de corriente en los circuitos, protegiendo los componentes sensibles. |        | $2             | 1        |
+| 11  | LED RGB                     | LED que emite luz de diferentes colores (Rojo, Verde, Azul), útil para indicar diferentes estados o alertas visuales. |        | $10            | 1        |
+| 12  | Resistencias de 330 ohmios y 2k ohmios | Componentes necesarios para regular la corriente y proteger los componentes electrónicos. |        | $1             | 2        |
+| 13  | Cables jumper dupont         | Cables para realizar conexiones entre los diferentes componentes en el protoboard o circuito. |        | $117            | 10       |
+| 14  | Baterías 12v                | Fuente de energía para alimentar los componentes de la gorra inteligente. |        | $50            | 1        |
+| 15  | Regulador                   | Componente que regula el voltaje para mantener una alimentación estable para los componentes. |        | $15            | 1        |
+| 16  | Rail de protoboard           | Utilizado para conectar los componentes electrónicos durante el desarrollo y pruebas del circuito. |        | $10            | 1        |
+
 
 
 ### Historias de usuario
