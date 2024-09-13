@@ -58,6 +58,16 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | GCP009 | Como invidente, quiero saber mi pulso cardiaco en un dashboard para que los demas tambien lo puedan ver. | Debe | 2 Días | Se probara viendo que el sensor mande la informacion correcta a la pantalla de acuerdo al pulso del usuario. | Israel |
 
 ### Prototipo propuesto por el equipo para el proyecto
+![]()
 
+### Despliegue del Dashboard
+![]()
 
-### Ruta del tablero con el acceso por parte del docente
+### Comunicación MQTT
+![]()
+
+### Base de Datos
+![]()
+
+### Carta de Agradecimiento
+![]()
