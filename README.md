@@ -40,7 +40,7 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | 13  | Cables jumper dupont         | Cables para realizar conexiones entre los diferentes componentes en el protoboard o circuito. |  ![jumpers](https://github.com/Anthonyy12/wearable/blob/main/images/jumpers.jpg)      | $117            | 10       |
 | 14  | Baterías 12v                | Fuente de energía para alimentar los componentes de la gorra inteligente. |        | $50            | 1        |
 | 15  | Regulador                   | Componente que regula el voltaje para mantener una alimentación estable para los componentes. |        | $15            | 1        |
-| 16  | Rail de protoboard           | Utilizado para conectar los componentes electrónicos durante el desarrollo y pruebas del circuito. |   ![proto](https://github.com/Anthonyy12/wearable/blob/main/images/proto.jpg)     | $10            | 1        |
+| 16  | Rail de protoboard           | Utilizado para conectar los componentes electrónicos durante el desarrollo y pruebas del circuito. |   ![proto](https://github.com/Anthonyy12/wearable/blob/main/images/protoboard.jpg)     | $10            | 1        |
 
 
 
@@ -58,7 +58,9 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | GCP009 | Como invidente, quiero saber mi pulso cardiaco en un dashboard para que los demas tambien lo puedan ver. | Debe | 2 Días | Se probara viendo que el sensor mande la informacion correcta a la pantalla de acuerdo al pulso del usuario. | Israel |
 
 ### Prototipo propuesto por el equipo para el proyecto
-![]()
+![](https://github.com/Anthonyy12/wearable/blob/main/images/PrototipoEnDibujo.jpg)
+# En Fisico
+![](https://github.com/Anthonyy12/wearable/blob/main/images/protoFisico.jpg)
 
 ### Despliegue del Dashboard
 ![]()
