@@ -15,17 +15,31 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ### Software empleado
 | ID | Software | Version | Tipo |
 |----|----------|---------|------|
-| 1  | PlatformIO | 6.1.16 | sdas |
-| 2  | Visual Studio Code | Cell 6  | adad |
-| 3  | Firebase | Cell 9  | dawa |
+| 1  | PlatformIO | 6.1.15 | Open Source |
+| 2  | Visual Studio Code | 1.92.2  | Open Source |
+| 3  | Firebase | -  | Freemium |
+| 4  | EMQX Platform | 5.0  | Open Source |
+| 5  | Flutter | 3.22.2  | Open Source |
 
 
 ### Hardware empleado
-| ID | Nombre | Descripción | Imagen | Costo Unitario | Cantidad |
-|----|--------|:-----------:|--------|:--------------:|:--------:|
-| 1  | ESP32  | La ESP32 actuaría como el cerebro de la gorra inteligente, gestionando la conectividad, procesando los datos de los sensores y controlando la interacción con otros dispositivos para brindar una experiencia adaptada a las necesidades de las personas sordas. |  | $300 | 1 |
-| 2  | DHT11  | Podría medir la temperatura ambiente. Esto podría ser útil para proporcionar información sobre el clima y la temperatura a la persona sorda, ayudándola a adaptarse y tomar las precauciones necesarias. |  | $50 | 1 |
-| 3  | HC-SR04 | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |  | $50 | 1 |
+| ID  | Nombre                      | Descripción                                                                                                                              | Imagen | Costo Unitario | Cantidad |
+|-----|-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------:|--------|:--------------:|:--------:|
+| 1   | ESP32                       | La ESP32 actuaría como el cerebro de la gorra inteligente, gestionando la conectividad, procesando los datos de los sensores y controlando la interacción con otros dispositivos para brindar una experiencia adaptada a las necesidades de las personas sordas. |  ![esp](https://github.com/Anthonyy12/wearable/blob/main/images/esp.jpg)      | $300           | 1        |
+| 2   | HC-SR04                     | Puede detectar la presencia de objetos cercanos. Esto podría ser útil para alertar a la persona sorda sobre la presencia de obstáculos o personas cercanas, evitando posibles colisiones. |    ![hc](https://github.com/Anthonyy12/wearable/blob/main/images/hc.jpg)    | $50            | 1        |
+| 3   | MPU6050                     | Sensor acelerómetro y giroscopio que puede detectar el movimiento y la orientación. Esto podría ayudar a la gorra inteligente a detectar el movimiento del usuario y proporcionar retroalimentación relevante. |   ![mpu](https://github.com/Anthonyy12/wearable/blob/main/images/mpu6050.jpg)     | $74           | 1        |
+| 4   | Pantalla OLED 0.96"         | Pantalla de visualización para mostrar información al usuario, como el estado del dispositivo o alertas importantes. |   ![oled](https://github.com/Anthonyy12/wearable/blob/main/images/oled.jpg)     | $283           | 1        |
+| 5   | Buzzer pasivo ARD-356        | Puede emitir sonidos como alertas auditivas para el usuario. Podría ser útil para notificaciones. |  ![buzzerpas](https://github.com/Anthonyy12/wearable/blob/main/images/buzzerpasivo.jpg)      | $29            | 1        |
+| 6   | Buzzer                      | Similar al buzzer pasivo, puede emitir sonidos para notificaciones o alertas. |   ![buzzer](https://github.com/Anthonyy12/wearable/blob/main/images/buzzer.jpg)     | $15            | 1        |
+| 7  | LED RGB                     | LED que emite luz de diferentes colores (Rojo, Verde, Azul), útil para indicar diferentes estados o alertas visuales. |   ![rgb](https://github.com/Anthonyy12/wearable/blob/main/images/rgb.jpg)     | $10            | 1        |
+| 8  | LED  Amarillo                   | LED que emite luz útil para indicar diferentes estados o alertas visuales. |      ![led](https://github.com/user-attachments/assets/37cf9624-53c1-4822-8951-e38984c6d418)| $10       | 1     |
+| 8  | LDR(Fotorresistencia)                   | Util para indicar el nivel de luz |   ![LDR](https://github.com/user-attachments/assets/ec7a472a-478f-49e6-b402-0d3bb7d119e6)| $10       | 1     |
+| 9  | Resistencias de 330 ohmios y 2k ohmios | Componentes necesarios para regular la corriente y proteger los componentes electrónicos. |   ![resistencias](https://github.com/Anthonyy12/wearable/blob/main/images/330.jpg)     | $1             | 2        |
+| 10  | Cables jumper dupont         | Cables para realizar conexiones entre los diferentes componentes en el protoboard o circuito. |  ![jumpers](https://github.com/Anthonyy12/wearable/blob/main/images/jumpers.jpg)      | $117            | 10       |
+| 11  | Regulador                   | Componente que regula el voltaje para mantener una alimentación estable para los componentes. |     ![reguladordevoltios](https://github.com/user-attachments/assets/c9f9fd79-2dc3-4f73-a143-493b5a1f021c)| $120            | 1        |
+| 12  | Placa fenolica           | Utilizado para conectar los componentes electrónicos durante el desarrollo y pruebas del circuito. |     ![placafenolica](https://github.com/user-attachments/assets/87df3366-5011-4820-b605-d70829fe9aa0)| $90            | 1        |
+| 12  | Estaño           | Utilizado para reducir el numero de cables y hacer conexion entre la esp32 y los componentes |  ![unnamed](https://github.com/user-attachments/assets/e155ef3a-6310-44cf-abf6-8dce2274df12)| $90            | 1        |
+
 
 
 ### Historias de usuario
@@ -42,6 +56,18 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | GCP009 | Como invidente, quiero saber mi pulso cardiaco en un dashboard para que los demas tambien lo puedan ver. | Debe | 2 Días | Se probara viendo que el sensor mande la informacion correcta a la pantalla de acuerdo al pulso del usuario. | Israel |
 
 ### Prototipo propuesto por el equipo para el proyecto
+![](https://github.com/Anthonyy12/wearable/blob/main/images/PrototipoEnDibujo.jpg)
+# En Fisico
+![](https://github.com/Anthonyy12/wearable/blob/main/images/protoFisico.jpg)
 
+### Despliegue del Dashboard
+![]()
 
-### Ruta del tablero con el acceso por parte del docente
+### Comunicación MQTT
+![]()
+
+### Base de Datos
+![]()
+
+### Carta de Agradecimiento
+![]()
