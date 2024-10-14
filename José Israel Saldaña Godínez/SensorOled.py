@@ -1,87 +1,89 @@
 import machine
-import ssd1306
 import dht
-import math
 import time
+import network
+import ubinascii
+from umqtt.simple import MQTTClient
 
-# Configuración del sensor DHT22
-sensor = dht.DHT22(machine.Pin(32))
+# Clase para manejar el sensor ultrasónico HC-SR04
+class HCSR04:
+    def __init__(self, trigger_pin, echo_pin, echo_timeout_us=10000):
+        self.trigger = machine.Pin(trigger_pin, machine.Pin.OUT)
+        self.echo = machine.Pin(echo_pin, machine.Pin.IN)
+        self.echo_timeout_us = echo_timeout_us
 
-# Configuración del OLED display
-i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
-oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+    def _send_pulse_and_wait(self):
+        self.trigger.off()
+        time.sleep_us(5)
+        self.trigger.on()
+        time.sleep_us(10)
+        self.trigger.off()
+        try:
+            pulse_time = machine.time_pulse_us(self.echo, 1, self.echo_timeout_us)
+            return pulse_time
+        except OSError as ex:
+            return -1
 
-# Función para dibujar un círculo
-def draw_circle(cx, cy, radius, color=1):
-    for angle in range(0, 360):
-        angle_rad = math.radians(angle)
-        x = int(cx + radius * math.cos(angle_rad))
-        y = int(cy + radius * math.sin(angle_rad))
-        oled.pixel(x, y, color)
+    def distance_cm(self):
+        pulse_time = self._send_pulse_and_wait()
+        if pulse_time < 0:
+            return -1
+        distance = (pulse_time / 2) / 29.1  # Velocidad del sonido en el aire es aprox. 343 m/s
+        return distance
 
-# Función para dibujar un arco grueso
-def draw_thick_arc(cx, cy, radius, start_angle, end_angle, thickness=2):
-    for t in range(thickness):
-        for angle in range(start_angle, end_angle + 1):
-            angle_rad = math.radians(angle)
-            x = int(cx + (radius - t) * math.cos(angle_rad))
-            y = int(cy - (radius - t) * math.sin(angle_rad))
-            oled.pixel(x, y, 1)
+# Configuración de la red WiFi
+SSID = 'Megacable_6WHfTP3'  # Cambia esto por tu nombre de red
+PASSWORD = 'VmAVguPemQ37fX7CS9'  # Cambia esto por tu contraseña
+MQTT_BROKER = 'broker.hivemq.com'
+CLIENT_ID = ubinascii.hexlify(machine.unique_id())
 
-# Función para dibujar marcas de referencia en el gauge
-def draw_gauge_marks(cx, cy, radius):
-    for angle in range(-90, 91, 30):  # Marcas cada 30 grados
-        angle_rad = math.radians(angle)
-        x_start = int(cx + (radius - 4) * math.cos(angle_rad))
-        y_start = int(cy - (radius - 4) * math.sin(angle_rad))
-        x_end = int(cx + (radius - 1) * math.cos(angle_rad))
-        y_end = int(cy - (radius - 1) * math.sin(angle_rad))
-        oled.line(x_start, y_start, x_end, y_end, 1)
+# Pines de conexión
+dht_pin = machine.Pin(15)
+dht_sensor = dht.DHT11(dht_pin)
 
-# Función para dibujar el termómetro
-def draw_thermometer(cx, cy, min_temp, max_temp, current_temp):
-    oled.rect(cx - 8, cy - 30, 16, 60, 1)  # Termómetro más pequeño
-    temp_range = max_temp - min_temp
-    fill_height = int(((current_temp - min_temp) / temp_range) * 60)
-    oled.fill_rect(cx - 7, cy + 30 - fill_height, 14, fill_height, 1)  # Relleno del termómetro
-    oled.text(f'{current_temp:.1f}C', cx - 15, cy + 35, 1)  # Mostrar temperatura ajustada
+# Sensor ultrasonico
+ultrasonic = HCSR04(trigger_pin=5, echo_pin=18)
 
-# Función para mostrar la humedad en un gauge circular
-def draw_humidity_gauge(cx, cy, radius, humidity):
-    draw_circle(cx, cy, radius)  # Contorno del gauge
-    draw_gauge_marks(cx, cy, radius)  # Marcas de referencia
-    end_angle = int((humidity / 100) * 180) - 90  # Escala de 0 a 100% mapeada a 180 grados
-    draw_thick_arc(cx, cy, radius, -90, end_angle, thickness=2)  # Arco que representa la humedad
-    oled.text(f'Hum: {humidity:.0f}%', cx - 55, cy - 5, 1)  # Mostrar humedad ajustada en el centro
+# Conectar a WiFi
+def connect_wifi():
+    station = network.WLAN(network.STA_IF)
+    station.active(True)
+    station.connect(SSID, PASSWORD)
+    while not station.isconnected():
+        pass
+    print('Conexión WiFi establecida')
 
-def mostrar_graficas():
-    while True:
-        # Leer valores del sensor DHT22
-        sensor.measure()
-        temperatura = sensor.temperature()
-        humedad = sensor.humidity()
+# Publicar datos en MQTT
+def mqtt_publish(topic, msg):
+    client = MQTTClient(CLIENT_ID, MQTT_BROKER)
+    client.connect()
+    client.publish(topic, msg)
+    client.disconnect()
 
-        # Limpiar la pantalla
-        oled.fill(0)
+# Conexión WiFi
+connect_wifi()
 
-        # Coordenadas y configuración
-        cx_temp, cy_temp = 30, 32  # Ajustar coordenadas del termómetro
-        cx_humid, cy_humid = 96, 32
-        min_temp, max_temp = -40, 80  # Rango de temperaturas que soporta el DHT22
-        radius = 16  # Radio reducido para el gauge de humedad
+while True:
+    try:
+        # Leer sensor DHT11
+        dht_sensor.measure()
+        temp = dht_sensor.temperature()
+        hum = dht_sensor.humidity()
 
-        # Dibujar termómetro y gauge de humedad
-        draw_thermometer(cx_temp, cy_temp, min_temp, max_temp, temperatura)
-        draw_humidity_gauge(cx_humid, cy_humid, radius, humedad)
+        # Leer distancia del sensor ultrasónico
+        distance = ultrasonic.distance_cm()
 
-        # Mostrar el valor de la temperatura junto al termómetro
-        oled.text(f'Temp: {temperatura:.1f}C', 40, 0, 1)
+        # Mostrar datos en el monitor serie
+        print("Temperatura: {}C".format(temp))
+        print("Humedad: {}%".format(hum))
+        print("Distancia: {:.2f}cm".format(distance))
 
-        # Actualizar la pantalla
-        oled.show()
+        # Publicar en MQTT
+        mqtt_publish("sensor/temperature", str(temp))
+        mqtt_publish("sensor/humidity", str(hum))
+        mqtt_publish("sensor/distance", str(distance))
 
-        # Esperar un momento antes de leer nuevamente
-        time.sleep(2)
+        time.sleep(1)  # Esperar 5 segundos entre lecturas
 
-# Ejecutar la función para mostrar las gráficas
-mostrar_graficas()
+    except OSError as e:
+        print("Error al leer los sensores:", e)
