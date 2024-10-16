@@ -5,6 +5,7 @@ from umqtt.robust import MQTTClient
 import network
 import urequests as requests
 import ssd1306
+import gc
 
 class MPU6050:
     def __init__(self, i2c, addr=0x68):
@@ -58,6 +59,8 @@ BUZZER_PIN_19 = 19  # Pin para el segundo buzzer
 LED_R_PIN = 25  # Pin para el LED rojo
 LED_G_PIN = 26  # Pin para el LED verde
 LED_B_PIN = 27  # Pin para el LED azul
+MQ2_PIN = 35  # Definir el pin ADC para el sensor MQ-2
+
 
 # Pines para la pantalla OLED (I2C)
 I2C_SCL_PIN = 22
@@ -66,7 +69,7 @@ I2C_SDA_PIN = 21
 LED_PIN = 4
 
 # Umbral de distancia
-DISTANCIA_UMBRAL = 80  # en centímetros
+DISTANCIA_UMBRAL = 50  # en centímetros
 
 # Inicializar pantalla OLED, sensores y actuadores
 i2c = machine.SoftI2C(scl=machine.Pin(I2C_SCL_PIN), sda=machine.Pin(I2C_SDA_PIN))
@@ -81,6 +84,9 @@ led = machine.Pin(LED_PIN, machine.Pin.OUT)
 led_r = machine.Pin(LED_R_PIN, machine.Pin.OUT)
 led_g = machine.Pin(LED_G_PIN, machine.Pin.OUT)
 led_b = machine.Pin(LED_B_PIN, machine.Pin.OUT)
+mq2 = machine.ADC(machine.Pin(MQ2_PIN))
+mq2.atten(machine.ADC.ATTN_11DB)  # Configurar la escala a 3.3V
+
 
 # Inicializar el sensor MPU6050
 mpu = MPU6050(i2c)
@@ -91,8 +97,13 @@ historico_luz = []
 historico_accel = []  # Para almacenar datos del acelerómetro
 
 
-# Variables para el contador del buzzer
-buzzer_count = 0  # Contador de las veces que suena el buzzer
+
+async def leer_mq2():
+    try:
+        return mq2.read()
+    except Exception as e:
+        print('Error en leer MQ-2:', e)
+        return None
 
 
 # Función para calcular el promedio de los valores del acelerómetro
@@ -156,26 +167,18 @@ async def conectar_wifi():
 
 # Medir distancia del sensor ultrasónico (asincrónicamente)
 async def medir_distancia():
-    try:
-        trig.value(0)
-        await asyncio.sleep(0.000002)  # 2 microsegundos
-        trig.value(1)
-        await asyncio.sleep(0.00001)   # 10 microsegundos
-        trig.value(0)
-
-        # Esperar el pulso de ECHO
-        while echo.value() == 0:
-            pulso_inicio = utime.ticks_us()
-
-        while echo.value() == 1:
-            pulso_fin = utime.ticks_us()
-
-        duracion = utime.ticks_diff(pulso_fin, pulso_inicio)
-        distancia = (duracion * 0.0343) / 2
-        return distancia
-    except Exception as e:
-        print('Error en medir distancia:', e)
-        return None  # O maneja el error de otra manera
+    trig.value(0)
+    await asyncio.sleep(0.000002)
+    trig.value(1)
+    await asyncio.sleep(0.00001)
+    trig.value(0)
+    pulso_inicio, pulso_fin = 0, 0
+    while echo.value() == 0:
+        pulso_inicio = utime.ticks_us()
+    while echo.value() == 1:
+        pulso_fin = utime.ticks_us()
+    duracion = utime.ticks_diff(pulso_fin, pulso_inicio)
+    return (duracion * 0.0343) / 2
 
 # Leer valor de fotorresistencia (asincrónicamente)
 async def leer_fotorresistencia():
@@ -187,38 +190,19 @@ async def leer_fotorresistencia():
 
 # Leer datos del acelerómetro (asincrónicamente)
 async def leer_acelerometro():
-    try:
-        accel = mpu.read_accel_data()  # Obtiene datos del acelerómetro
-        historico_accel.append(accel)  # Agregar el valor al histórico
+    accel = mpu.read_accel_data()
+    historico_accel.append(accel)
+    if len(historico_accel) > 10:
+        historico_accel.pop(0)
+    return accel
 
-        # Mantener solo los últimos 10 registros
-        if len(historico_accel) > 10:
-            historico_accel.pop(0)
-
-        return accel
-    except Exception as e:
-        print('Error en leer acelerómetro:', e)
-        return None  # O maneja el error de otra manera
-
-# Controlar el buzzer de forma asincrónica
 # Controlar el buzzer de forma asincrónica
 async def controlar_buzzer(distancia):
     global buzzer_count
     if distancia < DISTANCIA_UMBRAL:
-        buzzer.value(1)  # Activar buzzer en pin 23
-        buzzer_count += 1  # Incrementar el contador
-        print("Distancia menor a 80 cm. Activando buzzer.")
-
-        # Comprobar si el buzzer ha sonado 5 veces
-        if buzzer_count == 5:
-            print("El buzzer ha sonado 5 veces. Activando melodía.")
-            buzzer.value(0)  # Apagar el buzzer en pin 23
-            await tocar_melodia()  # Tocar melodía en buzzer del pin 19
-            buzzer_count = 0  # Reiniciar contador
-        else:
-            await asyncio.sleep(0.5)  # Mantener el buzzer encendido por un tiempo corto
+        buzzer.value(1)
     else:
-        buzzer.value(0)  # Desactivar buzzer si la distancia es mayor al umbral
+        buzzer.value(0)
 
         
 
@@ -240,26 +224,18 @@ async def tocar_melodia():
 
 
 # Publicar en MQTT para cada sensor
-async def publicar_mqtt(client, distancia, luz, acelerometro):
+async def publicar_mqtt(client, distancia, luz, acelerometro, mq2_value):
     try:
-        # Publicar distancia en un tópico específico
-        mensaje_distancia = str(distancia)  # Convertir el valor numérico a cadena antes de enviar
-        client.publish('sensores/distancia', mensaje_distancia)
-        print('Dato de distancia enviado a MQTT:', mensaje_distancia)
-
-        # Publicar luz en un tópico específico
-        mensaje_luz = str(luz)
-        client.publish('sensores/luz', mensaje_luz)
-        print('Datos de luz enviados a MQTT:', mensaje_luz)
-
-        # Publicar acelerómetro en un tópico específico
+        client.publish('sensores/distancia', str(distancia))
+        client.publish('sensores/luz', str(luz))
         if acelerometro:
-            # Formato "x,y,z"
             mensaje_acelerometro = "{},{},{}".format(acelerometro['x'], acelerometro['y'], acelerometro['z'])
             client.publish('sensores/acelerometro', mensaje_acelerometro)
-            print('Datos del acelerómetro enviados a MQTT:', mensaje_acelerometro)
+        if mq2_value is not None:
+            client.publish('sensores/mq2', str(mq2_value))  # Publicar el valor del sensor MQ-2
     except Exception as e:
-        print('Error al publicar en MQTT:', e)
+        print('Error en MQTT:', e)
+
 
 
 # Publicar en Firebase
@@ -267,14 +243,18 @@ async def publicar_firebase(distancia, luz, acelerometro):
     datos = {
         'distancia': distancia,
         'luz': luz,
-        'acelerometro': acelerometro
+        # Solo enviar valores simples en lugar del objeto completo
+        'accel_x': acelerometro['x'],
+        'accel_y': acelerometro['y'],
+        'accel_z': acelerometro['z']
     }
     try:
-        # Cambiar la URL para usar el endpoint de 'push' que agrega un nuevo registro
+        gc.collect()
         response = requests.post(FIREBASE_URL, json=datos)
         print('Datos enviados a Firebase:', response.text)
     except Exception as e:
         print('Error al publicar en Firebase:', e)
+
         
 def verificar_luz(luz_actual):
     # Almacenar el valor actual en el histórico
@@ -299,29 +279,26 @@ def verificar_luz(luz_actual):
 
 # Función principal que coordina las lecturas y publicaciones
 async def main():
-    await conectar_wifi()  # Conectar a la red Wi-Fi
-
+    await conectar_wifi()
     client = MQTTClient(MQTT_CLIENT_ID, MQTT_BROKER)
     client.connect()
 
     while True:
         distancia = await medir_distancia()
-        luz = await leer_fotorresistencia()
+        luz = ldr.read()
         acelerometro = await leer_acelerometro()
+        mq2_value = await leer_mq2()  # Leer el valor del sensor MQ-2
 
-        if distancia is not None and luz is not None and acelerometro is not None:
+        if distancia is not None and luz is not None and acelerometro is not None and mq2_value is not None:
             await mostrar_datos_oled(distancia, luz, acelerometro)
-            await publicar_mqtt(client, distancia, luz, acelerometro)
+            await publicar_mqtt(client, distancia, luz, acelerometro, mq2_value)  # Pasar el valor de MQ-2
             await publicar_firebase(distancia, luz, acelerometro)
             await controlar_buzzer(distancia)
-            
             promedio_accel = calcular_promedio_accel(historico_accel)
-            controlar_led_rgb(promedio_accel)  # Controlar el LED RGB
-
-            # Verificar la luz actual
+            controlar_led_rgb(promedio_accel)
             verificar_luz(luz)
 
-        await asyncio.sleep(0.1)  # Esperar un segundo antes de la próxima lectura
+        await asyncio.sleep(0.3)
 
-# Ejecutar la función principal
+
 asyncio.run(main())
