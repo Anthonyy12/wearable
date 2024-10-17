@@ -39,6 +39,7 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 | 11  | Regulador                   | Componente que regula el voltaje para mantener una alimentación estable para los componentes. |     ![reguladordevoltios](https://github.com/user-attachments/assets/c9f9fd79-2dc3-4f73-a143-493b5a1f021c)| $120            | 1        |
 | 12  | Placa fenolica           | Utilizado para conectar los componentes electrónicos durante el desarrollo y pruebas del circuito. |     ![placafenolica](https://github.com/user-attachments/assets/87df3366-5011-4820-b605-d70829fe9aa0)| $90            | 1        |
 | 12  | Estaño           | Utilizado para reducir el numero de cables y hacer conexion entre la esp32 y los componentes |  ![unnamed](https://github.com/user-attachments/assets/e155ef3a-6310-44cf-abf6-8dce2274df12)| $90            | 1        |
+| 13  | Sensor MQ-2           | Utilizado para detectar distintos tipos de gases, como metano, hetano, etc | ![mq2](https://github.com/user-attachments/assets/f776b1b3-d1c3-416c-91d3-6741da16f556)| $150            | 1        |
 
 
 
