@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ultrasonic Sensor MQTT',
+      title: 'Control de Actuadores y Sensores',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -32,17 +32,20 @@ class _SensorPageState extends State<SensorPage> {
   final String broker = 'broker.hivemq.com';
   final String topicDistance = 'sensores/distancia';
   final String topicLight = 'sensores/luz';
-  final String topicMPU = 'sensores/acelerometro'; // Tópico para datos MPU
+  final String topicMPU = 'sensores/acelerometro';
+  final String topicMQ2 = 'sensores/mq2';
 
   MqttServerClient? client;
   String sensorData = '';
   List<ChartData> distanceData = [];
-  List<ChartData> lightData = []; // Lista para almacenar datos de luz
-  List<PolarChartData> mpuData = []; // Lista para datos de MPU
-  double lightValue = 0; // Valor de luz
-  int selectedGraph =
-      0; // 0 para gráfica de distancia, 1 para gauge de luz, 2 para line chart MPU, 3 para todas las gráficas juntas
-  bool isConnecting = false; // Para evitar múltiples intentos de conexión
+  List<ChartData> lightData = [];
+  List<PolarChartData> mpuData = [];
+  double lightValue = 0;
+  double mq2Value = 0;
+  double distanceValue = 0;
+  String mpuValues = '';
+  int selectedGraph = 0;
+  bool isConnecting = false;
 
   @override
   void initState() {
@@ -51,19 +54,17 @@ class _SensorPageState extends State<SensorPage> {
   }
 
   void connectMQTT() async {
-    if (isConnecting) return; // Evita múltiples reconexiones simultáneas
+    if (isConnecting) return;
     isConnecting = true;
 
-    client = MqttServerClient(broker, 'Lichita'); // ID único
+    client = MqttServerClient(broker, 'Lichita');
     client!.port = 1883;
     client!.logging(on: true);
-    client!.keepAlivePeriod = 60; // Mantener la conexión activa por más tiempo
-    client!.connectTimeoutPeriod =
-        5000; // Aumenta el tiempo de espera de la conexión
+    client!.keepAlivePeriod = 60;
+    client!.connectTimeoutPeriod = 5000;
 
     client!.onConnected = onConnected;
     client!.onDisconnected = onDisconnected;
-    client!.onSubscribed = onSubscribed;
 
     try {
       await client!.connect();
@@ -71,7 +72,7 @@ class _SensorPageState extends State<SensorPage> {
     } catch (e) {
       print('Connection failed: $e');
       client!.disconnect();
-      retryConnection(); // Intenta reconectar en caso de falla
+      retryConnection();
     } finally {
       isConnecting = false;
     }
@@ -89,7 +90,7 @@ class _SensorPageState extends State<SensorPage> {
   void disconnectMQTT() {
     if (client != null) {
       client!.disconnect();
-      client = null; // Limpia la instancia del cliente
+      client = null;
     }
   }
 
@@ -97,9 +98,8 @@ class _SensorPageState extends State<SensorPage> {
     print('Connected');
     client!.subscribe(topicDistance, MqttQos.atLeastOnce);
     client!.subscribe(topicLight, MqttQos.atLeastOnce);
-    client!
-        .subscribe(topicMPU, MqttQos.atLeastOnce); // Subscribirse al tópico MPU
-    print('Subscribed to topics: $topicDistance, $topicLight, $topicMPU');
+    client!.subscribe(topicMPU, MqttQos.atLeastOnce);
+    client!.subscribe(topicMQ2, MqttQos.atLeastOnce);
 
     client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage message = c[0].payload as MqttPublishMessage;
@@ -114,167 +114,244 @@ class _SensorPageState extends State<SensorPage> {
 
   void updateSensorData(String topic, String payload) {
     if (topic == topicDistance) {
-      sensorData = 'Distance: $payload cm';
-      updateChartData(distanceData, double.tryParse(payload) ?? 0, 0);
+      distanceValue = double.tryParse(payload) ?? 0;
+      updateChartData(distanceData, distanceValue, 0);
     } else if (topic == topicLight) {
-      sensorData = 'Light: $payload';
-      lightValue = double.tryParse(payload) ?? 0; // Actualiza el valor de luz
+      lightValue = double.tryParse(payload) ?? 0;
       updateChartData(lightData, lightValue, 1);
     } else if (topic == topicMPU) {
-      sensorData = 'MPU: $payload';
-      updateMPUData(payload); // Actualiza los datos de la gráfica line chart
+      updateMPUData(payload);
+    } else if (topic == topicMQ2) {
+      mq2Value = double.tryParse(payload) ?? 0;
     } else {
-      print('Unknown topic: $topic'); // Para depuración
+      print('Unknown topic: $topic');
     }
   }
 
   void updateChartData(List<ChartData> chartData, double value, int type) {
     if (chartData.length > 20) {
-      chartData.removeAt(0); // Remueve el primer punto si hay más de 20
+      chartData.removeAt(0);
     }
     chartData.add(ChartData(DateTime.now(), value));
   }
 
   void updateMPUData(String payload) {
-    // Asume que los datos vienen en formato X,Y,Z separados por comas
     List<String> values = payload.split(',');
     if (values.length == 3) {
       double x = double.tryParse(values[0]) ?? 0;
       double y = double.tryParse(values[1]) ?? 0;
       double z = double.tryParse(values[2]) ?? 0;
 
+      mpuValues =
+          'X: $x, Y: $y, Z: $z'; // Actualiza los valores actuales de MPU
+
       if (mpuData.length > 20) {
         mpuData.removeAt(0);
       }
-
-      // Almacena la fecha y hora de recepción junto con los valores de X, Y, Z
       mpuData.add(PolarChartData(DateTime.now(), x, y, z));
     }
   }
 
   void onDisconnected() {
     print('Disconnected');
-    retryConnection(); // Intenta reconectar cuando se desconecta
+    retryConnection();
   }
 
-  void onSubscribed(String topic) {
-    print('Subscribed to $topic');
+  void toggleActuator(String topic, String message) {
+    if (client != null &&
+        client!.connectionStatus?.state == MqttConnectionState.connected) {
+      final builder = MqttClientPayloadBuilder();
+      builder.addString(message);
+      client!.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+      print('Sent $message to $topic');
+    } else {
+      print('Not connected');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ultrasonic Sensor MQTT'),
+        title: const Text('Control de Actuadores y Sensores'),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment(0.8, 1),
-            colors: <Color>[
-              Color.fromARGB(255, 87, 80, 100),
-              Color.fromARGB(255, 103, 93, 104),
-              Color.fromARGB(255, 112, 104, 110),
-              Color.fromARGB(255, 131, 123, 126),
-              Color.fromARGB(255, 146, 138, 139),
-              Color.fromARGB(255, 148, 143, 143),
-              Color.fromARGB(255, 177, 174, 173),
-              Color.fromARGB(255, 228, 226, 225),
+      body: Column(
+        children: [
+          // Botones para seleccionar las gráficas
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedGraph = 0; // Cambiar a gráfica de distancia
+                  });
+                },
+                child: const Text('Gráfica de Distancia'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedGraph = 1; // Cambiar a gauge de luz
+                  });
+                },
+                child: const Text('Gauge de Luz'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedGraph = 2; // Cambiar a gráfica de líneas (MPU)
+                  });
+                },
+                child: const Text('Gráfica de Líneas MPU'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedGraph = 3; // Cambiar a gauge de MQ2
+                  });
+                },
+                child: const Text('Gauge de MQ2'),
+              ),
             ],
-            tileMode: TileMode.mirror,
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Botones para elegir el gráfico
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedGraph = 0; // Cambiar a gráfica de distancia
-                    });
-                  },
-                  child: const Text('Gráfica de Distancia'),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedGraph = 1; // Cambiar a gauge de luz
-                    });
-                  },
-                  child: const Text('Gauge de Luz'),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedGraph = 2; // Cambiar a gráfica de líneas (MPU)
-                    });
-                  },
-                  child: const Text('Gráfica de Líneas MPU'),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedGraph = 3; // Mostrar las tres gráficas juntas
-                    });
-                  },
-                  child: const Text('Ver todas las gráficas'),
-                ),
-              ],
-            ),
-            const SizedBox(
-                height: 20), // Espacio entre los botones y el gráfico
-            Expanded(
-              child: selectedGraph == 0
-                  ? buildDistanceChart()
-                  : selectedGraph == 1
-                      ? buildLightGauge()
-                      : selectedGraph == 2
-                          ? buildLineChart()
-                          : buildAllCharts(), // Mostrar todas las gráficas juntas
-            ),
-            // Mostrar datos solo del sensor correspondiente
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                selectedGraph == 0
-                    ? (distanceData.isEmpty
-                        ? 'No distance data received'
-                        : 'Distance: ${distanceData.last.value} cm')
-                    : selectedGraph == 1
-                        ? (lightData.isEmpty
-                            ? 'No light data received'
-                            : 'Light: ${lightData.last.value}')
-                        : selectedGraph == 2
-                            ? (mpuData.isEmpty
-                                ? 'No MPU data received'
-                                : 'MPU: X=${mpuData.last.x}, Y=${mpuData.last.y}, Z=${mpuData.last.z}')
-                            : 'Mostrando todas las gráficas',
-                style: const TextStyle(fontSize: 24, color: Colors.white),
+          // Botones de control para actuadores
+          Expanded(
+            flex: 2,
+            child: Container(
+              color: Colors.grey[200],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/buzzer1', 'on');
+                        },
+                        child: const Text('Encender Buzzer 1'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/buzzer1', 'off');
+                        },
+                        child: const Text('Apagar Buzzer 1'),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/buzzer2', 'on');
+                        },
+                        child: const Text('Encender Buzzer 2'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/buzzer2', 'off');
+                        },
+                        child: const Text('Apagar Buzzer 2'),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/oled', 'on');
+                        },
+                        child: const Text('Encender OLED'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/oled', 'off');
+                        },
+                        child: const Text('Apagar OLED'),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/led_rgb', 'on');
+                        },
+                        child: const Text('Encender LED RGB'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/led_rgb', 'off');
+                        },
+                        child: const Text('Apagar LED RGB'),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/led', 'on');
+                        },
+                        child: const Text('Encender LED'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleActuator('actuador/led', 'off');
+                        },
+                        child: const Text('Apagar LED'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Mostrar el valor del sensor correspondiente según la gráfica seleccionada
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              selectedGraph == 0
+                  ? 'Distancia: ${distanceValue.toStringAsFixed(2)} cm'
+                  : selectedGraph == 1
+                      ? 'Luz: ${lightValue.toStringAsFixed(2)}'
+                      : selectedGraph == 2
+                          ? 'MPU: $mpuValues'
+                          : 'MQ2: ${mq2Value.toStringAsFixed(2)}',
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
+          // Gráficas
+          Expanded(
+            flex: 3,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.grey[300],
+              child: Column(
+                children: [
+                  Expanded(
+                    child: selectedGraph == 0
+                        ? buildDistanceChart()
+                        : selectedGraph == 1
+                            ? buildLightGauge()
+                            : selectedGraph == 2
+                                ? buildLineChart()
+                                : buildMQ2Gauge(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget buildAllCharts() {
-    return Column(
-      children: [
-        Expanded(child: buildDistanceChart()),
-        const SizedBox(height: 20),
-        Expanded(child: buildLightGauge()),
-        const SizedBox(height: 20),
-        Expanded(child: buildLineChart()),
-      ],
     );
   }
 
@@ -282,9 +359,10 @@ class _SensorPageState extends State<SensorPage> {
     return SfCartesianChart(
       title: ChartTitle(text: 'Distance Sensor'),
       primaryXAxis: DateTimeAxis(),
+      primaryYAxis: NumericAxis(),
       series: <LineSeries<ChartData, DateTime>>[
         LineSeries<ChartData, DateTime>(
-          dataSource: distanceData, // Datos solo de distancia
+          dataSource: distanceData,
           xValueMapper: (ChartData data, _) => data.time,
           yValueMapper: (ChartData data, _) => data.value,
         ),
@@ -298,9 +376,9 @@ class _SensorPageState extends State<SensorPage> {
       axes: <RadialAxis>[
         RadialAxis(
           minimum: 0,
-          maximum: 600, // Ajusta según el rango de tu sensor de luz
+          maximum: 600,
           pointers: <GaugePointer>[
-            NeedlePointer(value: lightValue), // Usa el valor actualizado de luz
+            NeedlePointer(value: lightValue),
           ],
           ranges: <GaugeRange>[
             GaugeRange(startValue: 0, endValue: 200, color: Colors.green),
@@ -315,39 +393,46 @@ class _SensorPageState extends State<SensorPage> {
   Widget buildLineChart() {
     return SfCartesianChart(
       title: ChartTitle(text: 'MPU6050 Sensor Data'),
-      primaryXAxis: DateTimeAxis(
-        title: AxisTitle(text: 'Time'),
-      ),
-      primaryYAxis: NumericAxis(
-        title: AxisTitle(text: 'Value'),
-      ),
-      legend: Legend(isVisible: true), // Mostrar leyenda para identificar ejes
-      tooltipBehavior: TooltipBehavior(enable: true), // Habilitar tooltips
+      primaryXAxis: DateTimeAxis(),
+      primaryYAxis: NumericAxis(),
       series: <LineSeries<PolarChartData, DateTime>>[
         LineSeries<PolarChartData, DateTime>(
           dataSource: mpuData,
           xValueMapper: (PolarChartData data, _) => data.time,
           yValueMapper: (PolarChartData data, _) => data.x,
           name: 'X Axis',
-          color: Colors.red, // Color para el eje X
-          markerSettings:
-              const MarkerSettings(isVisible: true), // Marcadores visibles
         ),
         LineSeries<PolarChartData, DateTime>(
           dataSource: mpuData,
           xValueMapper: (PolarChartData data, _) => data.time,
           yValueMapper: (PolarChartData data, _) => data.y,
           name: 'Y Axis',
-          color: Colors.green, // Color para el eje Y
-          markerSettings: const MarkerSettings(isVisible: true),
         ),
         LineSeries<PolarChartData, DateTime>(
           dataSource: mpuData,
           xValueMapper: (PolarChartData data, _) => data.time,
           yValueMapper: (PolarChartData data, _) => data.z,
           name: 'Z Axis',
-          color: Colors.blue, // Color para el eje Z
-          markerSettings: const MarkerSettings(isVisible: true),
+        ),
+      ],
+    );
+  }
+
+  Widget buildMQ2Gauge() {
+    return SfRadialGauge(
+      title: const GaugeTitle(text: 'MQ2 Sensor'),
+      axes: <RadialAxis>[
+        RadialAxis(
+          minimum: 0,
+          maximum: 1000,
+          pointers: <GaugePointer>[
+            NeedlePointer(value: mq2Value),
+          ],
+          ranges: <GaugeRange>[
+            GaugeRange(startValue: 0, endValue: 300, color: Colors.green),
+            GaugeRange(startValue: 300, endValue: 700, color: Colors.orange),
+            GaugeRange(startValue: 700, endValue: 1000, color: Colors.red),
+          ],
         ),
       ],
     );
