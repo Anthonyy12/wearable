@@ -1,6 +1,6 @@
 # Ejercicios SER
 
-Sensor proximidad con pantalla OLED
+Sensor proximidad con pantalla OLED \n
 https://drive.google.com/file/d/172wtGknBHfvRs2xkL2Kh_taY2YQd-0CA/view?usp=drive_link
 
 Potenciometro con pantalla OLED
