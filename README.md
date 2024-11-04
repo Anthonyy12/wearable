@@ -59,7 +59,6 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ### Prototipo propuesto por el equipo para el proyecto
 ![](https://github.com/Anthonyy12/wearable/blob/main/images/PrototipoEnDibujo.jpg)
 # En Fisico
-![](https://github.com/Anthonyy12/wearable/blob/main/images/protoFisico.jpg)
 ![Imagen de WhatsApp 2024-11-01 a las 21 15 39_f84ad842](https://github.com/user-attachments/assets/54e57ae1-6f90-41d8-a29d-bcba5874037a)
 ![Imagen de WhatsApp 2024-11-01 a las 21 15 39_599cace5](https://github.com/user-attachments/assets/6ab129a0-898f-4da0-9e2c-9002ca1d9845)
 ![Imagen de WhatsApp 2024-11-01 a las 21 15 39_198f989d](https://github.com/user-attachments/assets/42297539-2637-4489-80cd-164701308e05)
