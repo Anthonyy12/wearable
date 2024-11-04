@@ -15,11 +15,10 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ### Software empleado
 | ID | Software | Version | Tipo |
 |----|----------|---------|------|
-| 1  | PlatformIO | 6.1.15 | Open Source |
+| 1  | Thonny | 4.1.6 | Open Source |
 | 2  | Visual Studio Code | 1.92.2  | Open Source |
 | 3  | Firebase | -  | Freemium |
-| 4  | EMQX Platform | 5.0  | Open Source |
-| 5  | Flutter | 3.22.2  | Open Source |
+| 4  | Flutter | 3.22.2  | Open Source |
 
 
 ### Hardware empleado
@@ -66,8 +65,8 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ### Despliegue del Dashboard
 ![Imagen de WhatsApp 2024-11-01 a las 21 16 10_9be867d0](https://github.com/user-attachments/assets/46dc9f59-8c54-4fce-bc0f-029bdfa07a14)
 ![Imagen de WhatsApp 2024-11-01 a las 21 16 48_ca8c312b](https://github.com/user-attachments/assets/b1d6b853-fe0a-4ef5-9a29-412178b9495d)
-![Imagen de WhatsApp 2024-11-01 a las 21 16 28_d4a726e9](https://github.com/user-attachments/assets/04facc32-67cd-4a22-b675-139e63e9cd33)
-![Imagen de WhatsApp 2024-11-01 a las 21 16 39_678b94aa](https://github.com/user-attachments/assets/0ec7f3f2-7ffc-4541-9770-1b7cf21e586a)
+![Imagen de WhatsApp 2024-11-03 a las 21 41 32_c32790d3](https://github.com/user-attachments/assets/5e245a6d-12b7-45f7-b87e-16629fef0172)
+![Imagen de WhatsApp 2024-11-03 a las 21 41 52_dba18d74](https://github.com/user-attachments/assets/ef5a6274-ce47-4f1c-9e56-7919761f50ba)
 
 ### Comunicación MQTT
 ![Imagen de WhatsApp 2024-11-03 a las 21 31 31_241bb0be](https://github.com/user-attachments/assets/61356f7e-6443-431e-b00a-35a3cf2887b6)
