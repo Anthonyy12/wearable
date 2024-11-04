@@ -60,9 +60,15 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ![](https://github.com/Anthonyy12/wearable/blob/main/images/PrototipoEnDibujo.jpg)
 # En Fisico
 ![](https://github.com/Anthonyy12/wearable/blob/main/images/protoFisico.jpg)
+![Imagen de WhatsApp 2024-11-01 a las 21 15 39_f84ad842](https://github.com/user-attachments/assets/54e57ae1-6f90-41d8-a29d-bcba5874037a)
+![Imagen de WhatsApp 2024-11-01 a las 21 15 39_599cace5](https://github.com/user-attachments/assets/6ab129a0-898f-4da0-9e2c-9002ca1d9845)
+![Imagen de WhatsApp 2024-11-01 a las 21 15 39_198f989d](https://github.com/user-attachments/assets/42297539-2637-4489-80cd-164701308e05)
 
 ### Despliegue del Dashboard
-![]()
+![Imagen de WhatsApp 2024-11-01 a las 21 16 10_9be867d0](https://github.com/user-attachments/assets/46dc9f59-8c54-4fce-bc0f-029bdfa07a14)
+![Imagen de WhatsApp 2024-11-01 a las 21 16 48_ca8c312b](https://github.com/user-attachments/assets/b1d6b853-fe0a-4ef5-9a29-412178b9495d)
+![Imagen de WhatsApp 2024-11-01 a las 21 16 28_d4a726e9](https://github.com/user-attachments/assets/04facc32-67cd-4a22-b675-139e63e9cd33)
+![Imagen de WhatsApp 2024-11-01 a las 21 16 39_678b94aa](https://github.com/user-attachments/assets/0ec7f3f2-7ffc-4541-9770-1b7cf21e586a)
 
 ### Comunicación MQTT
 ![]()
