@@ -74,7 +74,7 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 ![]()
 
 ### Base de Datos
-![]()
+![Imagen de WhatsApp 2024-11-03 a las 21 13 11_66f93f19](https://github.com/user-attachments/assets/b3ce153d-9cc8-49f1-bebf-db5da626627a)
 
 ### Carta de Agradecimiento
 ![]()
