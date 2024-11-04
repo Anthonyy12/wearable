@@ -72,6 +72,7 @@ La gorra con sus sensores y funcionalidades proporcionaría a los invidentes her
 
 ### Comunicación MQTT
 ![Imagen de WhatsApp 2024-11-03 a las 21 31 31_241bb0be](https://github.com/user-attachments/assets/61356f7e-6443-431e-b00a-35a3cf2887b6)
+![Imagen de WhatsApp 2024-11-03 a las 21 31 46_7dafda60](https://github.com/user-attachments/assets/4bbb209e-22df-4f13-a0cb-54bb708ab3da)
 
 ### Base de Datos
 ![Imagen de WhatsApp 2024-11-03 a las 21 13 11_66f93f19](https://github.com/user-attachments/assets/b3ce153d-9cc8-49f1-bebf-db5da626627a)
